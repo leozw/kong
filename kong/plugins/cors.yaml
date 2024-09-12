@@ -1,0 +1,26 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: grafana-cors-plugin
+  namespace: lgtm
+  annotations:
+    konghq.com/plugin: "true"
+config:
+  origins:
+    - "*" 
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS
+  headers:
+    - Accept
+    - Authorization
+    - Content-Type
+  exposed_headers:
+    - X-Auth-Token
+  credentials: true
+  max_age: 3600
+plugin: cors

@@ -1,0 +1,177 @@
+replicaCount: 1
+
+# -- Type Statefulset 
+statefulset: false
+
+# -- Persistence only type statefulset
+persistence: 
+ enabled: false
+ volumeClaimTemplates:
+   - name: data
+     accessModes: [ "ReadWriteOnce" ]
+     resources:
+       requests:
+         storage: 1Gi
+
+# -- Statefulset strategy
+UpdateStrategy:
+   type: RollingUpdate
+
+image:
+  registry: docker.io
+  repository: pantsel/konga
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# -- Image pull secrets
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+# -- Define command to be executed by konga container at startup
+command: []
+# command: ["./start.sh"]
+
+# -- Define additional args if command is used
+args: []
+# args: ["app.jar"]
+
+# -- Deployment and Statefulset labels
+labels: {}
+# app.kubernetes.io/name: app
+
+# -- Extra environment variables passed to pods
+extraEnvs: []
+
+# -- Allows you to load environment variables from kubernetes secret or config map
+envFrom:
+  - secretRef:
+      name: kongasecret
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod labels
+podLabels: {}
+
+# -- Deployment strategy
+Strategy:
+   rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+   type: RollingUpdate
+
+# -- Pod securityContext
+podSecurityContext: {}
+## fsGroup: 2000
+
+# -- Deployment securityContext
+securityContext:
+  privileged: false
+
+# -- Additional Container Ports
+containerPorts:
+  - name: http
+    containerPort: 1337
+    protocol: TCP
+
+service:
+  annotations: {}
+  labels: {}
+  servicePorts:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
+
+# -- Additional configMap volume mounts
+configMounts: []
+
+# -- Additional secret volume mounts
+secretMounts: []
+
+# -- Create Secrets
+Secrets: {}
+
+# -- Create configmap
+ConfigMap: {}
+
+# -- Additional volume mounts
+extraVolumeMounts: []
+
+# -- Additional volumes
+extraVolumes: []
+
+ingress:
+  enabled: false
+  ingressClassName: ""
+  annotations:
+  hosts:
+    - host: example.domain.io
+      paths:
+        - path: /
+          pathType: Prefix
+          number: 80
+  tls: []
+
+# -- Liveness and Readiness Probe settings
+probe:
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+# -- CPU/Memory resource requests/limits
+resources: {}
+
+# -- HPA settings
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+# -- Node labels for pod assignment
+nodeSelector: {}
+
+# -- Toleration labels for pod assignment
+tolerations: []
+
+# -- Affinity settings for pod assignment
+affinity: {}
+
+# -- Create cronjobs
+CronJobs: []
+
+# -- Sidecar containers to add to the pod
+extraContainers: []
+
+# -- Additional init containers
+extraInitContainers: []
+
+# -- Enable creating secrets
+extraSecrets:
+  enabled: true
+  name: kongasecret
+  data: 
+    TOKEN_SECRET: konga
+    DB_ADAPTER: postgres
+    DB_PORT: "5432"
+    DB_DATABASE: konga
+    NODE_ENV: development
+    DB_HOST: "kong-db-service.db.svc.cluster.local"
+    DB_PASSWORD: "4WV6Gyc3T8jQP3z2xs8E45mG7C9swHopHm39TA58"
+    DB_USER: konga
+
+# -- Enable creating configmap
+extraConfigMap: 
+    enabled: false

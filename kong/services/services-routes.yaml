@@ -1,0 +1,242 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mimir-service
+  namespace: lgtm
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: kong-auth-jwt, prometheus
+    konghq.com/protocols: https
+    konghq.com/https-redirect-status-code: "301"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - mimir.elvenobservability.com
+      secretName: mimir-tls
+  rules:
+    - host: mimir.elvenobservability.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mimir-distributor
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loki-service
+  namespace: lgtm
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: kong-auth-jwt, prometheus
+    konghq.com/protocols: https
+    konghq.com/https-redirect-status-code: "301"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - loki.elvenobservability.com
+      secretName: loki-tls
+  rules:
+    - host: loki.elvenobservability.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: loki-loki-distributed-distributor
+                port:
+                  number: 3100
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tempo-service
+  namespace: lgtm
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: kong-auth-jwt, prometheus
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - tempo.elvenobservability.com
+      secretName: tempo-tls
+  rules:
+    - host: tempo.elvenobservability.com
+      http:
+        paths:
+          - path: /metrics
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tempo-distributor
+                port:
+                  number: 3100
+          - path: /http
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tempo-distributor
+                port:
+                  number: 4318
+          - path: /grpc
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tempo-distributor
+                port:
+                  number: 4317
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-service
+  namespace: lgtm
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/protocols: https
+    konghq.com/https-redirect-status-code: "301"
+    konghq.com/plugins: prometheus
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - grafana.elvenobservability.com
+      secretName: grafana-tls
+  rules:
+    - host: grafana.elvenobservability.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: org-setup-service
+  namespace: default
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/protocols: https
+    konghq.com/https-redirect-status-code: "301"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - org-setup.elvenobservability.com
+      secretName: org-setup-tls
+  rules:
+    - host: org-setup.elvenobservability.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: grafana-org-setup-service
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opentelemetry-serive
+  namespace: default
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - opentelemetry.elvenobservability.com
+      secretName: opentelemetry-tls
+  rules:
+    - host: opentelemetry.elvenobservability.com
+      http:
+        paths:
+          - path: /http
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: opentelemetrycollector
+                port:
+                  number: 4318
+          - path: /grpc
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: opentelemetrycollector
+                port:
+                  number: 4317
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-service
+  namespace: default
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+    konghq.com/protocols: https
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - keycloak.elvenobservability.com
+      secretName: keycloak-tls
+  rules:
+    - host: keycloak.elvenobservability.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: heyyya-ws-service
+  namespace: default
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    konghq.com/strip-path: "true"
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:  
+        - heyyya.com
+      secretName: heyyya-ws
+  rules:
+    - host: heyyya.com
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: heyyya-ws
+                port:
+                  number: 3000

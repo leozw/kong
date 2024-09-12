@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-ingress
+  namespace: kong
+  annotations:
+    konghq.com/strip-path: "true"
+    konghq.com/rewrite-target: /
+spec:
+  rules:
+    - host: kong-proxy.zwirtes.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kong-kong-proxy
+                port:
+                  number: 8000
+  # tls:
+  #   - hosts:
+  #       - example.com
+  #     secretName: example-tls

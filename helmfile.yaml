@@ -1,0 +1,35 @@
+repositories:
+  - name: konga
+    url: https://leozw.github.io/konga
+
+  - name: kong
+    url: https://charts.konghq.com
+
+  - name: postgresql
+    url: https://leozw.github.io/postgresql
+
+releases:
+  - name: kong-db
+    namespace: db
+    createNamespace: true
+    chart: postgresql/postgresql
+    values:
+      - ./postgres/values.yaml
+
+  - name: kong
+    namespace: kong
+    createNamespace: true
+    chart: kong/kong
+    values:
+      - ./kong/values.yaml
+    needs:
+      - db/kong-db
+
+  - name: konga
+    namespace: kong
+    createNamespace: true
+    chart: konga/konga
+    values:
+      - ./konga/values.yaml
+    needs:
+      - kong/kong

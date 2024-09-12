@@ -1,0 +1,13 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: kong-auth-jwt
+  namespace: lgtm
+  annotations:
+    konghq.com/plugin: "true"
+config:
+  header_names:
+    - Authorization
+  run_on_preflight: true
+plugin: jwt
+consumerRef: elven-lgtm
